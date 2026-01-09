@@ -1,0 +1,101 @@
+trading-bot/
+│
+├── main.py                         # Bootstrap / composition root
+│
+├── interface/
+│   └── discord/
+│       ├── bot.py                  # Inicialización del bot
+│       ├── commands/
+│       │   ├── buy.py
+│       │   ├── sell.py
+│       │   ├── run_strategy.py
+│       │   ├── wallet.py
+│       │   ├── portfolio.py
+│       │   ├── financial_stats.py
+│       │   ├── red_button.py
+│       │   └── current_report.py
+│       │
+│       ├── reports/
+│       │   ├── daily.py
+│       │   ├── weekly.py
+│       │   └── monthly.py
+│       │
+│       └── notifications/
+│           └── critical.py
+│
+├── application/
+│   ├── ports/                      # Interfaces (ABC)
+│   │   ├── broker.py               # Broker ABC
+│   │   ├── market_data.py
+│   │   └── notifier.py
+│   │
+│   ├── trading/
+│   │   ├── buy.py
+│   │   ├── sell.py
+│   │   └── run_strategy.py
+│   │
+│   ├── portfolio/
+│   │   ├── wallet.py
+│   │   └── portfolio.py
+│   │
+│   ├── reports/
+│   │   ├── daily.py
+│   │   ├── weekly.py
+│   │   └── monthly.py
+│   │
+│   └── monitoring/
+│       ├── red_button.py
+│       ├── critical_fstats.py
+│       └── edge_monitor.py
+│
+├── domain/
+│   ├── strategies/
+│   │   ├── base.py
+│   │   └── strategy_set.py
+│   │
+│   ├── indicators/
+│   │   ├── sma.py
+│   │   └── ewma.py
+│   │
+│   ├── edge/
+│   │   ├── positive.py
+│   │   └── negative.py
+│   │
+│   ├── risk/
+│   │   ├── floor_price.py
+│   │   └── position_limits.py
+│   │
+│   ├── portfolio/
+│   │   ├── position.py
+│   │   └── portfolio.py
+│   │
+│   └── reporting/
+│       ├── roi.py
+│       └── snapshot.py
+│
+├── infrastructure/
+│   ├── broker/
+│   │   └── alpaca.py               # Implements Broker ABC
+│   │
+│   ├── market_data/
+│   │   └── alpaca.py
+│   │
+│   ├── notifications/
+│   │   └── discord.py
+│   │
+│   ├── scheduler/
+│   │   └── scheduler.py
+│   │
+│   └── persistence/
+│       └── repository.py
+│
+├── config/
+│   └── settings.py
+│
+├── tests/
+│   ├── unit/
+│   ├── integration/
+│   └── paper_trading/
+│
+├── requirements.txt
+└── README.md
