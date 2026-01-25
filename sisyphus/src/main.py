@@ -4,8 +4,9 @@ from infrastructure.order.order_placer import OrderPlacer
 from application.account_wallet_service import AccountWalletService
 from discord_bot.bot import startSisyphus
 import discord
-import os # default module
+import os 
 from dotenv import load_dotenv
+
 print("[O] Initialiazing Sisyphus ...")
 
 load_dotenv() # load all the variables from the env file
