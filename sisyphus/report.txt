@@ -1,3 +1,11 @@
-- closed
-- ROI (%)
-- ROI (ABS)
+PER_ASSET
+- CLOSED
+- DAILY ROI (%)
+- DAILY ROI (ABS)
+- EWMA (# DAY, \alpha)
+
+SYP 500, MARKET INDICATOR
+- EWMA (# DAY, \alpha)
+
+IMAGE
+- 

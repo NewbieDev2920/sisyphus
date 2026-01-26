@@ -133,7 +133,7 @@ class RealtimeMarketData(RealtimeMarketDataPort):
 
     def _send(self,payload):
         if not self.authenticated_event.is_set():
-            raise RuntimeError("WEBSOCKET_STREAM IS NOT AUTHENTICATED.")
+            raise RuntimeError("<<< WEBSOCKET_STREAM IS NOT AUTHENTICATED. >>>")
         self.ws.send(json.dumps(payload))
 
 
