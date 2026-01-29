@@ -27,3 +27,7 @@ class GraphGeneratorPort(ABC):
     def plot_time_series(self, function_list: list, title:str):
         pass
 
+    @abstractmethod
+    def plot_hist(self, series : list):
+        pass
+

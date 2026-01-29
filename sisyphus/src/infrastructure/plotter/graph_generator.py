@@ -1,3 +1,4 @@
+from cProfile import label
 from domain.ports.graph.graph_generator_port import GraphGeneratorPort
 from domain.ports.graph.function_type import FunctionType
 from domain.ports.graph.axis_type import AxisType
@@ -16,21 +17,28 @@ class GraphGenerator(GraphGeneratorPort):
         for f in function_list:
             f_marker = None
             f_linestyle = None
-            if f.type == FunctionType.LINE_SEGMENTS:
+            if f.ftype == FunctionType.LINE_SEGMENTS:
                 f_linestyle = "-"
-            elif f.type == FunctionType.SCATTER:
+            elif f.ftype == FunctionType.SCATTER:
                 f_marker = "."
                 f_linestyle = ""
-            elif f.type == FunctionType.SOFT_CURVE:
+            elif f.ftype == FunctionType.SOFT_CURVE:
                 f_linestyle = "-"
-            elif f.type == FunctionType.STEM:
+            elif f.ftype == FunctionType.STEM:
                 pass
+            elif f.ftype == FunctionType.SHADED_STEP:
+                ymin, ymax = ax.get_ylim()
+                ax.fill_between(f.sampled_data["domain"],ymin,ymax, 
+                    where = (f.sampled_data["range"] == 1) | (f.sampled_data["range"] == True), color = "green", alpha = 0.21, step="post", label = f.name+" == 1")
+
+                ax.fill_between(f.sampled_data["domain"],ymin,ymax, 
+                    where = (f.sampled_data["range"] == 0) | (f.sampled_data["range"] == False), color = "red", alpha = 0.21, step="post", label = f.name+ " == 0")
             
-            if f.type is not FunctionType.STEM:
+            if f.ftype is not FunctionType.STEM and f.ftype is not FunctionType.SHADED_STEP:
                 ax.plot(f.sampled_data["domain"],f.sampled_data["range"](f.sampled_data["domain"]), 
                     label = f.name, color = f.color, marker = f_marker, linestyle= f_linestyle
                 )
-            else:
+            elif f.ftype is not FunctionType.SHADED_STEP:
                 ax.stem(f.sampled_data["domain"],f.sampled_data["range"](f.sampled_data["domain"]))
         
         ax.set_xlabel(x_axis["label"])
@@ -48,3 +56,17 @@ class GraphGenerator(GraphGeneratorPort):
 
     def plot_time_series(self, function_list : list, title : str):
         self.plot(function_list,title,{"label":"time","type": AxisType.DATE},{"label":"f(t)","type":AxisType.CONTINUOUS})
+
+    #series must be a list of pd.Series
+    #colors must be a list of strings in #RRGGBB format
+    def plot_hist(self, series : list, title : str ,x_axis_label : str, colors : list ,bins = 12 ,density = False):
+        plt.style.use('seaborn-v0_8')
+        fig, ax = plt.subplots()
+        ax.set_xlabel(x_axis_label)
+        ax.set_title(title)
+        ax.hist(series, density = density, bins= bins, color=color)
+        figure_name = hash_gen()
+        plt.savefig(self.IMAGE_STORAGE_PATH+figure_name+".jpg")
+        print("HISTOGRAM GENERATED AND SAVED SUCCESSFULLY!")
+
+

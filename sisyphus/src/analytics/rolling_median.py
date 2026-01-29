@@ -10,3 +10,4 @@ def rolling_median(df : pd.DataFrame,target : str,index: str,start,end,) -> floa
             return string_indexed_df.loc[start:end,target].median()
         except:
             raise Exception("There is a problem with the current index you gave. (DataFrame indexing ERROR)")
+

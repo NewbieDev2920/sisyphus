@@ -6,4 +6,5 @@ class FunctionType(Enum):
     STEM = "stem"
     LINE_SEGMENTS = "line_segments"
     SOFT_CURVE = "soft_line"
+    SHADED_STEP = "shaded_step"
     

@@ -1,0 +1,50 @@
+trading_bot/
+│
+├── domain/                       ← NÚCLEO (reglas puras)
+│   │
+│   ├── fsm/                      ← 🧠 MÁQUINA DE ESTADOS
+│   │   ├── __init__.py
+│   │   ├── states.py             ← Enum de estados
+│   │   ├── events.py             ← Señales + eventos lógicos
+│   │   └── trading_fsm.py        ← FSM (transiciones)
+│   │
+│   ├── strategy/
+│   │   ├── __init__.py
+│   │   ├── base.py               ← Strategy abstracta (Observer)
+│   │   └── threshold.py          ← Strategy concreta
+│   │
+│   ├── signals.py                ← BUY / SELL / HOLD
+│   ├── portfolio.py              ← balance lógico (no exchange)
+│   └── events/
+│       ├── market.py             ← PriceUpdate, CandleClose
+│       └── execution.py          ← OrderFilled, OrderRejected
+│
+├── ports/                        ← CONTRATOS (interfaces)
+│   │
+│   ├── stream_port.py            ← fuente de eventos
+│   ├── executor_port.py          ← ejecución de órdenes
+│   ├── portfolio_port.py         ← acceso a balance
+│   └── clock_port.py             ← tiempo (opcional)
+│
+├── application/                  ← ORQUESTACIÓN
+│   │
+│   ├── engine.py                 ← bucle principal
+│   └── wiring.py                 ← inyección de dependencias
+│
+├── adapters/                     ← INFRAESTRUCTURA
+│   │
+│   ├── streams/
+│   │   ├── websocket_stream.py   ← live
+│   │   └── historical_stream.py  ← backtest
+│   │
+│   ├── executors/
+│   │   ├── paper_executor.py
+│   │   └── exchange_executor.py
+│   │
+│   └── portfolio/
+│       └── exchange_portfolio.py ← habla con exchange
+│
+├── config/
+│   └── settings.py
+│
+└── main.py
