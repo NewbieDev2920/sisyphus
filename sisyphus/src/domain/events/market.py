@@ -1,4 +1,6 @@
+from domain.events.event import Event
 
-class PriceUpdate():
-    def __init__(self,price : float):
+class PriceUpdate(Event):
+    def __init__(self,price : float, symbol : str):
         self.price = price
+        self.symbol = symbol

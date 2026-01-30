@@ -14,7 +14,7 @@ def rolling_avg(df : pd.DataFrame,target : str,index: str,start,end,) -> float:
 
 
 #O(1)
-#
+#Revisar funcion
 def next_rolling_avg(df : pd.DataFrame, current_rolling_avg : float,target : str,new_start,new_end,) -> float:
     if type(new_start) is not int or type(new_end) is not int:
         new_start = df.index.get_loc(new_start)

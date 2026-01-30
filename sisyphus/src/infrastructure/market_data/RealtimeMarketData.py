@@ -1,5 +1,8 @@
 import websocket
 from domain.ports.market_data_port.realtime_market_data_port import RealtimeMarketDataPort
+from domain.events.event import Event
+from domain.events.market import PriceUpdate
+from domain.ports.reporter_port import ReporterPort
 import websocket 
 import json 
 import threading
@@ -36,6 +39,26 @@ class RealtimeMarketData(RealtimeMarketDataPort):
         self.authenticated_event = threading.Event()
         self.logs = []
         self.MAX_LOGS = 12
+        #Format
+        #list of dicts
+        # {"SYMBOL1":[observer1SYMBOL1,observer2SYMBOL1,...]}
+        self.observers = {}
+        self.reporters = []
+
+    def append_observer(self,obs):
+        if type(self.observers[obs.symbol]) is list:
+            self.observers[obs.symbol].append(obs)
+
+    def append_reporter(self, reporter : ReporterPort):
+        self.reporters.append(reporter)
+
+    def notify_reporters(self, event : Event):
+        for reporter in self.reporters:
+            reporter.update(event)
+    
+    def notify(self, symbol : str, event : Event):
+        for observer in self.observers[symbol]:
+            observer.update(event)
 
     def _display(self, text):
         self.logs.append(text)
@@ -68,12 +91,14 @@ class RealtimeMarketData(RealtimeMarketDataPort):
         self.ws.send(json.dumps(req))
         self.is_auth_req_sent = True
 
-    def subscribe(self, symbol):
+    def subscribe(self, symbol : str):
         self._display(f"SISYPHUS> subscribe the following symbol: {symbol}")
 
         req = {"action": "subscribe", "quotes": [symbol]}
         self._send(req)
-        self.registered_symbols.append(symbol)
+        if symbol not in self.registered_symbols:
+            self.registered_symbols.append(symbol)
+            self.observers[symbol] = []
 
     def subscribe_all_official_registered_symbols(self):
         self._display(f"ALPACA> subscribe the following official symbols: {self.official_registered_symbols}")
@@ -106,6 +131,8 @@ class RealtimeMarketData(RealtimeMarketDataPort):
 
         msg = json.loads(message)
 
+        last_response_quote = None
+
         for m in msg:
             t = m.get("T")
             if t == "success":
@@ -115,9 +142,25 @@ class RealtimeMarketData(RealtimeMarketDataPort):
                 if status == "authenticated":
                     self.authenticated_event.set()
             elif t == "q":
+                last_response_quote = m
                 self.last_quotes.append(m)
                 if len(self.last_quotes) > self.LAST_QUOTES_MAX_LENGTH:
                     self.last_quotes.pop(0) 
+        try:
+            if last_response_quote is not None:
+                self._display("im here approximating the price")
+                symbol = last_response_quote.get("S")
+                #BID PRICE
+                bp = float(last_response_quote.get("bp"))
+                #ASK PRICE
+                ap = float(last_response_quote.get("ap"))
+                approximated_asset_price = (bp+ap)/2
+                #Por que no mando raise Exception si no inicialice bien el objeto???
+                price_update_event = PriceUpdate(approximated_asset_price, symbol)
+                self.notify_reporters(price_update_event)
+                self.notify(symbol,price_update_event)        
+        except:
+            print("Something wrong happened with asset price approximation.")
 
     def get_last_quotes(self):
         return self.last_quotes[self.LAST_QUOTES_MAX_LENGTH - 1]
@@ -135,5 +178,7 @@ class RealtimeMarketData(RealtimeMarketDataPort):
         if not self.authenticated_event.is_set():
             raise RuntimeError("<<< WEBSOCKET_STREAM IS NOT AUTHENTICATED. >>>")
         self.ws.send(json.dumps(payload))
+
+
 
 

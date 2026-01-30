@@ -38,10 +38,6 @@ class OrderPlacer(OrderPort):
             print(f"[!]| BUY ORDER ERROR {e}")
             return "Something wrong occured with the BUY order creation."
 
-        
-
-        
-
     def sell(self, symbol, notional):
         try:
             order_data = MarketOrderRequest(
