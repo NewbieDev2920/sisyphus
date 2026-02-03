@@ -1,6 +1,7 @@
 from alpaca.trading.client import TradingClient
 from domain.ports.account_port import AccountPort
 
+
 class AlpacaAccount(AccountPort):
     
     def __init__(self, trading_client : TradingClient):
@@ -40,7 +41,7 @@ class AlpacaAccount(AccountPort):
     @property
     def cash(self):
         self.refresh()
-        return self.account.cash
+        return float(self.account.cash)
 
     @property
     def pending_transfer(self):
@@ -78,3 +79,18 @@ class AlpacaAccount(AccountPort):
         [x]| account_number : {self.account.account_number}
         [x]| status : {self.account.status}
         """
+
+
+    def get_asset_position(self, symbol: str):
+        self.refresh()
+        return self.trading_client.get_open_position(symbol)
+
+    def portfolio(self):
+        self.refresh()
+        return self.trading_client.get_all_positions()
+
+    def dict_portfolio(self):
+        portfolio = {}
+        for pos in self.portfolio():
+            portfolio[pos.symbol] = pos.qty
+        return portfolio

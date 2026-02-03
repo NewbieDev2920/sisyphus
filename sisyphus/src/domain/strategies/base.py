@@ -6,6 +6,7 @@ class Base(ABC):
 
     def __init__(self, symbol : str):
         self.symbol = symbol
+        self.name = self.__class__.__name__
 
     @abstractmethod
     def update(self, event : Event):

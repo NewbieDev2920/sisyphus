@@ -14,3 +14,11 @@ class OrderPort(ABC):
     @abstractmethod
     def sell():
         pass
+
+    @abstractmethod
+    def buy_qty():
+        pass
+
+    @abstractmethod
+    def sell_qty():
+        pass

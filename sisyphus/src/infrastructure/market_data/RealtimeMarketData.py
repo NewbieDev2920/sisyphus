@@ -35,6 +35,7 @@ class RealtimeMarketData(RealtimeMarketDataPort):
         self.is_connected = False
         self.is_auth_req_sent = False
         self.last_quotes = []
+        self.symbol_to_quote = {}
         self.LAST_QUOTES_MAX_LENGTH = 37
         self.authenticated_event = threading.Event()
         self.logs = []
@@ -157,6 +158,7 @@ class RealtimeMarketData(RealtimeMarketDataPort):
                 approximated_asset_price = (bp+ap)/2
                 #Por que no mando raise Exception si no inicialice bien el objeto???
                 price_update_event = PriceUpdate(approximated_asset_price, symbol)
+                self.symbol_to_quote[symbol] = approximated_asset_price
                 self.notify_reporters(price_update_event)
                 self.notify(symbol,price_update_event)        
         except:

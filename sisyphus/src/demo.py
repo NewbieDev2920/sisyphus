@@ -24,7 +24,7 @@ with Live(layout, console = console, refresh_per_second = 10):
 
     API_KEY = os.getenv('API_KEY')
     SECRET = os.getenv('SECRET')
-    WEBSOCKET_URL = os.getenv('WEBSOCKET_URL_TEST')
+    WEBSOCKET_URL = os.getenv('WEBSOCKET_URL')
 
     conn = RealtimeMarketData(WEBSOCKET_URL, API_KEY, SECRET, console, layout["stream"])
     conn.connect()
@@ -33,8 +33,8 @@ with Live(layout, console = console, refresh_per_second = 10):
     
     conn.append_reporter(demo_reporter)
     #MUST SUBSCRIBE BEFORE ADDING STRATEGIES.
-    conn.subscribe('FAKEPACA')
-    strategy1 = MonotonicIncreasing("FAKEPACA")
+    conn.subscribe('AMD')
+    strategy1 = MonotonicIncreasing("AMD")
     strategy1.realtimemarketdata = conn
     conn.append_observer(strategy1)
     
