@@ -4,6 +4,7 @@ from domain.events.event import Event
 from domain.events.fsm import StateChange, OrderResolved
 from domain.events.market import PriceUpdate
 from domain.events.strategy import SignalEvent
+from infrastructure.console_handler import get_console_handler
 
 
 class TradingFSM:
@@ -60,7 +61,7 @@ class TradingFSM:
         handler = self._event_handlers.get(type(event))
 
         if not handler:
-            print(f"No handler for {type(event)}")
+            get_console_handler().print_bot(f"No handler for {type(event)}")
             return
 
         handler(event)
@@ -98,7 +99,7 @@ class TradingFSM:
         handler = self._signal_handlers.get(signal)
 
         if not handler:
-            print(f"No handler for {signal}")
+            get_console_handler().print_bot(f"No handler for {signal}")
             return
 
         handler(value)
@@ -120,7 +121,7 @@ class TradingFSM:
         cost = qty * price
 
         if cash < cost:
-            print(f"Insufficient funds: {cash} < {cost}")
+            get_console_handler().print_bot(f"Insufficient funds: {cash} < {cost}")
             return
 
         self._buy_qty(qty)
@@ -135,7 +136,7 @@ class TradingFSM:
         pos_qty = self.asset_qty()
 
         if pos_qty < qty:
-            print("Not enough assets to sell")
+            get_console_handler().print_bot("Not enough assets to sell")
             return
 
         self._sell_qty(qty)
@@ -150,7 +151,7 @@ class TradingFSM:
         cash = self._get_cash()
 
         if cash < amount:
-            print("Insufficient funds")
+            get_console_handler().print_bot("Insufficient funds")
             return
 
         self._buy_notional(amount)
@@ -162,7 +163,7 @@ class TradingFSM:
         pos_value = self.asset_qty() * self.symbol_approx_price()
 
         if pos_value < amount:
-            print("Not enough position value")
+            get_console_handler().print_bot("Not enough position value")
             return
 
         self._sell_notional(amount)
@@ -173,25 +174,25 @@ class TradingFSM:
 
     def _buy_qty(self, qty: float):
 
-        print(f"BUY {qty} {self.symbol}")
+        get_console_handler().print_bot(f"BUY {qty} {self.symbol}")
 
         self.executor.buy_qty(self.symbol,qty)
 
     def _sell_qty(self, qty: float):
 
-        print(f"SELL {qty} {self.symbol}")
+        get_console_handler().print_bot(f"SELL {qty} {self.symbol}")
 
         self.executor.sell_qty(self.symbol,qty)
 
     def _buy_notional(self, amount: float):
 
-        print(f"BUY {self.symbol} for ${amount}")
+        get_console_handler().print_bot(f"BUY {self.symbol} for ${amount}")
 
         self.executor.buy_notional(self.symbol,amount)
 
     def _sell_notional(self, amount: float):
 
-        print(f"SELL {self.symbol} for ${amount}")
+        get_console_handler().print_bot(f"SELL {self.symbol} for ${amount}")
 
         self.executor.sell_notional(self.symbol, amount)
 

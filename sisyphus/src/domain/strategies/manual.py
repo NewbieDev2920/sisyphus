@@ -1,7 +1,9 @@
 from domain.strategies.base import Base
-from domain.events.event import Event
+from domain.events.market import PriceUpdate
+from infrastructure.console_handler import get_console_handler
 from domain.signals import Signal
 from domain.events.strategy import SignalEvent
+from domain.events.event import Event
 
 class Manual(Base):
 
@@ -11,7 +13,7 @@ class Manual(Base):
         self.name = self.__class__.__name__
 
     def update(self, event : Event):
-        print("No update needed for manual strategy.")
+        get_console_handler().print_bot("No update needed for manual strategy.")
 
     def compute_signal(self, signal : Signal, numeric_value):
         self.fsm.on_event(SignalEvent(signal, numeric_value))

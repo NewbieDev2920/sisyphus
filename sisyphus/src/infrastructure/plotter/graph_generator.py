@@ -4,6 +4,8 @@ from domain.ports.graph.function_type import FunctionType
 from domain.ports.graph.axis_type import AxisType
 from utils.hash_gen import hash_gen 
 import matplotlib.pyplot as plt
+import pandas as pd
+from infrastructure.console_handler import get_console_handler
 
 
 class GraphGenerator(GraphGeneratorPort):
@@ -47,7 +49,7 @@ class GraphGenerator(GraphGeneratorPort):
         ax.legend()
         figure_name = hash_gen()
         plt.savefig(self.IMAGE_STORAGE_PATH+figure_name+".jpg")
-        print("FIGURE GENERATED AND SAVED SUCCESSFULLY!")
+        get_console_handler().print_bot("FIGURE GENERATED AND SAVED SUCCESSFULLY!")
 
 
 
@@ -67,6 +69,6 @@ class GraphGenerator(GraphGeneratorPort):
         ax.hist(series, density = density, bins= bins, color=color)
         figure_name = hash_gen()
         plt.savefig(self.IMAGE_STORAGE_PATH+figure_name+".jpg")
-        print("HISTOGRAM GENERATED AND SAVED SUCCESSFULLY!")
+        get_console_handler().print_bot("HISTOGRAM GENERATED AND SAVED SUCCESSFULLY!")
 
 

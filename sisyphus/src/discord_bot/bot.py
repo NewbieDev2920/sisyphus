@@ -6,11 +6,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class SisyphusCog(discord.Cog):
-    def __init__(self, bot, wallet_service, order_placer_service, register_handler):
+    def __init__(self, bot, wallet_service, order_placer_service, register_handler, console_handler):
         self.bot = bot
         self.wallet_service = wallet_service
         self.order_placer_service = order_placer_service
         self.register_handler = register_handler
+        self.console_handler = console_handler
 
     @discord.slash_command(name="hello", description="Say hello to the bot, Sisyphus will present itself and his capabilities")
     async def hello(self, ctx: discord.ApplicationContext):
@@ -111,7 +112,7 @@ class SisyphusCog(discord.Cog):
         try:
             await ctx.respond(f"QUOTE\n[i]| {symbol} : {self.order_placer_service.get_quote(symbol)}")
         except Exception as e:
-            await ctx.respond(f"ERROR FETCHING {symbol} QUOTE, MAKE SURE THE SYMBOL IS REGISTERED.")
+            await ctx.respond(f"ERROR FETCHING {symbol} QUOTE, MAKE SURE THE SYMBOL IS REGISTERED. : {e}")
     
     @discord.slash_command(name="registered_list", description = "Display registered list")
     async def registered_list(self, ctx: discord.ApplicationContext):
@@ -130,44 +131,57 @@ class SisyphusCog(discord.Cog):
         except Exception as e:
             await ctx.respond(f"An error occurred while displaying current fsm status: {e}")
 
+    @discord.slash_command(name="toggle", description="Toggle console output between bot logs and stream logs")
+    async def toggle(self, ctx: discord.ApplicationContext):
+        try:
+            self.console_handler.toggle()
+            mode = "BOT" if self.console_handler.toggle_bot else "STREAM"
+            await ctx.respond(f"Console toggled to {mode} mode")
+        except Exception as e:
+            await ctx.respond(f"An error occurred while toggling console: {e}")
+
 class SisyphusBot(discord.Bot):
 
-    def __init__(self, wallet_service, order_placer_service ,register_handler,debug_guilds=None):
+    def __init__(self, wallet_service, order_placer_service ,register_handler, console_handler, debug_guilds=None):
         intents = discord.Intents.default()
         super().__init__(intents=intents, debug_guilds=debug_guilds)
         self.wallet_service = wallet_service
-        self.add_cog(SisyphusCog(self, wallet_service, order_placer_service, register_handler))
+        self.console_handler = console_handler
+        self.add_cog(SisyphusCog(self, wallet_service, order_placer_service, register_handler, console_handler))
 
     async def on_ready(self):
-        print(f"[x]|{self.user} is ready and online!")
-        print(f"[i]|Connected to {len(self.guilds)} guilds.")
+        self.console_handler.print_bot(f"[x]|{self.user} is ready and online!")
+        self.console_handler.print_bot(f"[i]|Connected to {len(self.guilds)} guilds.")
         
         if self.debug_guilds:
-            print(f"[i]|Debugging enabled for guilds: {self.debug_guilds}")
+            self.console_handler.print_bot(f"[i]|Debugging enabled for guilds: {self.debug_guilds}")
         
         # Explicitly sync commands
-        print("[i] Syncing commands...")
+        self.console_handler.print_bot("[i] Syncing commands...")
         await self.sync_commands()
         
         # List registered commands
-        print("[i] Registered Commands:")
+        self.console_handler.print_bot("[i] Registered Commands:")
         for cmd in self.commands:
-            print(f" - /{cmd.name} (Guild IDs: {cmd.guild_ids})")
+            self.console_handler.print_bot(f" - /{cmd.name} (Guild IDs: {cmd.guild_ids})")
         if not self.commands:
-             print("[!] WARNING: No commands registered! Check Cog loading.")
+             self.console_handler.print_bot("[!] WARNING: No commands registered! Check Cog loading.")
 
 
-def startSisyphus(wallet_service, order_placer_service, register_handler):
-    print("[x] <--- SISYPHUS IS READY TO SERVE --->")
+def startSisyphus(wallet_service, order_placer_service, register_handler, console_handler):
+    msg = "[x] <--- SISYPHUS IS READY TO SERVE --->"
+    console_handler.print_bot(msg)
+    console_handler.star_bot_log(msg)
+    
     guild_id = os.getenv('GUILD_ID')
     
     debug_guilds = None
     if guild_id:
         try:
             debug_guilds = [int(guild_id)]
-            print(f"[!] Debugging in Guild ID: {guild_id}")
+            console_handler.print_bot(f"[!] Debugging in Guild ID: {guild_id}")
         except ValueError:
-            print(f"[ERROR] GUILD_ID '{guild_id}' is not a valid integer. Ignoring.")
+            console_handler.print_bot(f"[ERROR] GUILD_ID '{guild_id}' is not a valid integer. Ignoring.")
             
-    bot = SisyphusBot(wallet_service,order_placer_service, register_handler,debug_guilds=debug_guilds)
+    bot = SisyphusBot(wallet_service, order_placer_service, register_handler, console_handler, debug_guilds=debug_guilds)
     bot.run(os.getenv("BOT_TOKEN"))

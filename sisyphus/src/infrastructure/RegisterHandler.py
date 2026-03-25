@@ -5,6 +5,7 @@ from domain.ports.fsm.trading_fsm import TradingFSM
 from application.order_placer_service import OrderPlacerService
 from infrastructure.account.alpaca_account import AlpacaAccount
 from infrastructure.SisyphusExe import SisyphusExe
+from infrastructure.console_handler import get_console_handler
 """
 fsm = TradingFSM(symbol, alpaca_account, bot_bp=10000.0, executor=executor)
     strategy = Manual(symbol, fsm)
@@ -56,7 +57,7 @@ class RegisterHandler(RegisterHandlerPort):
             if symbol in config["registered_symbols"]:
                 config["registered_symbols"].remove(symbol)
         except Exception as e:
-            print(f"An error has occured while updating config: {e}")
+            get_console_handler().print_bot(f"An error has occured while updating config: {e}")
             
         # Write back
         with open(self.path, "w", encoding="utf-8") as f:

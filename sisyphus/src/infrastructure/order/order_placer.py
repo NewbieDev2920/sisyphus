@@ -1,8 +1,10 @@
 from domain.ports.order_port import OrderPort
-from alpaca.trading.requests import  MarketOrderRequest
+from alpaca.trading.client import TradingClient
+from alpaca.trading.requests import MarketOrderRequest
 from alpaca.trading.enums import OrderSide, TimeInForce
 from alpaca.trading.requests import GetOrdersRequest
 from alpaca.trading.enums import QueryOrderStatus
+from infrastructure.console_handler import get_console_handler
 
 class OrderPlacer(OrderPort):
 
@@ -31,10 +33,10 @@ class OrderPlacer(OrderPort):
             )
 
             response = self.trading_client.submit_order(order_data = order_data)
-            print("[+]| BUY ORDER SUBMITTED")
+            get_console_handler().print_bot("[+]| BUY ORDER SUBMITTED")
             return response
         except Exception as e:
-            print(f"[!]| BUY ORDER ERROR {e}")
+            get_console_handler().print_bot(f"[!]| BUY ORDER ERROR {e}")
             return "Something wrong occured with the BUY order creation."
 
     def sell(self, symbol : str, notional):
@@ -47,10 +49,10 @@ class OrderPlacer(OrderPort):
             )
 
             response = self.trading_client.submit_order(order_data = order_data)
-            print("[-]| SELL ORDER SUBMITTED")
+            get_console_handler().print_bot("[-]| SELL ORDER SUBMITTED")
             return response
         except Exception as e:
-            print(f"[!]| SELL ORDER ERROR {e}")
+            get_console_handler().print_bot(f"[!]| SELL ORDER ERROR {e}")
             return "Something wrong occured with the SELL order creation."
 
     def buy_qty(self, symbol, qty):
@@ -63,10 +65,10 @@ class OrderPlacer(OrderPort):
             )
 
             response = self.trading_client.submit_order(order_data = order_data)
-            print("[+]| BUY ORDER SUBMITTED")
+            get_console_handler().print_bot("[+]| BUY ORDER SUBMITTED")
             return response
         except Exception as e:
-            print(f"[!]| BUY ORDER ERROR {e}")
+            get_console_handler().print_bot(f"[!]| BUY ORDER ERROR {e}")
             return "Something wrong ocurred with the BUY order creation."
 
 
@@ -80,10 +82,10 @@ class OrderPlacer(OrderPort):
             )
 
             response = self.trading_client.submit_order(order_data = order_data)
-            print("[-]| SELL ORDER SUBMITTED")
+            get_console_handler().print_bot("[-]| SELL ORDER SUBMITTED")
             return response
         except Exception as e:
-            print(f"[!]| SELL ORDER ERROR {e}")
+            get_console_handler().print_bot(f"[!]| SELL ORDER ERROR {e}")
             return "Something wrong ocurred with the SELL order creation."
 
     def get_open_orders(self):

@@ -3,11 +3,10 @@ from domain.ports.market_data_port.realtime_market_data_port import RealtimeMark
 from domain.events.event import Event
 from domain.events.market import PriceUpdate
 from domain.ports.reporter_port import ReporterPort
+from domain.ports.console_handler_port import ConsoleHandlerPort
 import websocket 
 import json 
 import threading
-from rich.panel import Panel
-from rich.text import Text
 
 
 class RealtimeMarketData(RealtimeMarketDataPort):
@@ -16,15 +15,8 @@ class RealtimeMarketData(RealtimeMarketDataPort):
     #30 SYMBOLS STREAM LIMIT.
     #REVISAR RENDIMIENTO AL USAR PYTHON LIST, POSIBLEMENTE CAMBIAR A NUMPY.NDARRAY.
 
-
-    """
-
-    REFACTORIZA TODA ESTA MIERDA.
-
-    """
-    def __init__(self, SOCKET_URL, API_KEY, SECRET, console_layout, layout):
-        self.console_layout = console_layout
-        self.layout = layout
+    def __init__(self, SOCKET_URL, API_KEY, SECRET, console_handler: ConsoleHandlerPort):
+        self.console_handler = console_handler
         self.API_KEY = API_KEY
         self.SECRET= SECRET
         self.SOCKET_URL = SOCKET_URL
@@ -38,8 +30,6 @@ class RealtimeMarketData(RealtimeMarketDataPort):
         self.symbol_to_quote = {}
         self.LAST_QUOTES_MAX_LENGTH = 37
         self.authenticated_event = threading.Event()
-        self.logs = []
-        self.MAX_LOGS = 12
         #Format
         #list of dicts
         # {"SYMBOL1":[observer1SYMBOL1,observer2SYMBOL1,...]}
@@ -61,23 +51,16 @@ class RealtimeMarketData(RealtimeMarketDataPort):
         for observer in self.observers[symbol]:
             observer.update(event)
 
-    def _display(self, text):
-        self.logs.append(text)
-        if len(self.logs) > self.MAX_LOGS:
-            self.logs.pop(0)
-
-        content = "\n".join(self.logs)
-
-        panel = Panel(
-            Text(content, overflow="fold"),
-            title="ALPACA STREAM",
-            border_style="cyan"
-        )
-        self.layout.update(panel)
+    def _display(self, text, star=False):
+        """Display stream messages using console handler"""
+        self.console_handler.print_stream(text)
+        if star:
+            self.console_handler.star_stream_log(text)
 
     #Revisar teoria de threads y daemon.
     def connect(self):
-        self._display(f"SISYPHUS> connect to ALPACA ({self.SOCKET_URL})")
+        msg = f"SISYPHUS> connect to ALPACA ({self.SOCKET_URL})"
+        self._display(msg, star=True)
 
         thread = threading.Thread(
             target= self.ws.run_forever,
@@ -86,14 +69,16 @@ class RealtimeMarketData(RealtimeMarketDataPort):
         thread.start()
 
     def authenticate(self):
-        self._display("SISYPHYS> authenticate")
+        msg = "SISYPHYS> authenticate"
+        self._display(msg, star=True)
 
         req = {"action": "auth", "key":self.API_KEY, "secret": self.SECRET}
         self.ws.send(json.dumps(req))
         self.is_auth_req_sent = True
 
     def subscribe(self, symbol : str):
-        self._display(f"SISYPHUS> subscribe the following symbol: {symbol}")
+        msg = f"SISYPHUS> subscribe the following symbol: {symbol}"
+        self._display(msg, star=True)
 
         req = {"action": "subscribe", "quotes": [symbol]}
         self._send(req)
@@ -122,7 +107,8 @@ class RealtimeMarketData(RealtimeMarketDataPort):
             self.unsubscribe(symbol)
     
     def on_open(self, ws):
-        self._display("SYSYPHUS> ALPACA_MARKET_API stream connection opened")
+        msg = "SYSYPHUS> ALPACA_MARKET_API stream connection opened"
+        self._display(msg, star=True)
 
         self.authenticate()
         self.is_connected = True
@@ -138,10 +124,14 @@ class RealtimeMarketData(RealtimeMarketDataPort):
             t = m.get("T")
             if t == "success":
                 status = m.get("msg")
-                self._display(f"ALPACA>  {status}")
-
+                status_msg = f"ALPACA>  {status}"
+                # Star the authenticated message
                 if status == "authenticated":
+                    self._display(status_msg, star=True)
                     self.authenticated_event.set()
+                else:
+                    self._display(status_msg)
+
             elif t == "q":
                 last_response_quote = m
                 self.last_quotes.append(m)
@@ -149,7 +139,6 @@ class RealtimeMarketData(RealtimeMarketDataPort):
                     self.last_quotes.pop(0) 
         try:
             if last_response_quote is not None:
-                self._display("im here approximating the price")
                 symbol = last_response_quote.get("S")
                 #BID PRICE
                 bp = float(last_response_quote.get("bp"))
@@ -162,7 +151,7 @@ class RealtimeMarketData(RealtimeMarketDataPort):
                 self.notify_reporters(price_update_event)
                 self.notify(symbol,price_update_event)        
         except:
-            print("Something wrong happened with asset price approximation.")
+            self.console_handler.print_stream("Something wrong happened with asset price approximation.")
 
     def get_last_quotes(self):
         return self.last_quotes[self.LAST_QUOTES_MAX_LENGTH - 1]
@@ -180,7 +169,4 @@ class RealtimeMarketData(RealtimeMarketDataPort):
         if not self.authenticated_event.is_set():
             raise RuntimeError("<<< WEBSOCKET_STREAM IS NOT AUTHENTICATED. >>>")
         self.ws.send(json.dumps(payload))
-
-
-
 

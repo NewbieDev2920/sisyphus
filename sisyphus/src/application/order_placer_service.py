@@ -1,5 +1,6 @@
 from domain.ports.order_port import OrderPort
 from domain.strategies.base import Base
+from infrastructure.console_handler import get_console_handler
 
 class OrderPlacerService:
     #CAMBIAR ORDER_PLACER POR MANUAL STRATEGY.
@@ -15,7 +16,7 @@ class OrderPlacerService:
         try:
             del self.manual_strategies[symbol]
         except Exception as e:
-            print(f"Error : {e}")
+            get_console_handler().print_bot(f"Error : {e}")
 
     def buy(self, symbol, notional):
         try:
@@ -45,7 +46,7 @@ class OrderPlacerService:
         return self.order_placer.get_open_orders()
 
     def manual_strategy_error(self, e : Exception):
-        print(f"There is no manual strategy for this symbol : {e}")
+        get_console_handler().print_bot(f"There is no manual strategy for this symbol : {e}")
 
     def get_quote(self,symbol):
         return self.real_time_market_data.symbol_to_quote[symbol]

@@ -1,6 +1,8 @@
 {
     "registered_symbols": [
+        "TSLA",
         "SPY",
-        "TSLA"
+        "AMD",
+        "FAKEPACA"
     ]
 }
