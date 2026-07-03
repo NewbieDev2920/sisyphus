@@ -5,8 +5,9 @@ from domain.signals import Signal
 import pandas as pd
 
 class MonotonicIncreasing(Base):
-    def __init__(self, symbol : str, interval_size = 7):
+    def __init__(self, symbol : str, fsm=None, interval_size = 7):
         self.symbol = symbol
+        self.fsm = fsm
         self.name = self.__class__.__name__
         self.average_slope = -3
         self.interval_prices = []
@@ -24,6 +25,9 @@ class MonotonicIncreasing(Base):
 
     def compute_signal(self, signal : Signal, numeric_value):
         self.output.append(f"OUTPUT SIGNAL : {str(signal)} : {numeric_value}")
+        if self.fsm:
+            from domain.events.strategy import SignalEvent
+            self.fsm.on_event(SignalEvent(signal, numeric_value))
 
     def monotonic_increasing(self):
         interval_slopes = []

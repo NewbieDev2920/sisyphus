@@ -27,12 +27,12 @@ class HistoricalMarketData(HistoricalMarketDataPort):
     """
     
 
-    def get_symbol_time_series(self, symbol, period, interval, start, end) -> pandas.DataFrame:
+    def get_symbol_time_series(self, symbol, period, interval, start, end) -> pd.DataFrame:
         asset = yf.Ticker(symbol)
         return asset.history(period=period, interval=interval, start=start, end=end)
 
     #Symbols must be a list of strings
-    def get_multiple_symbols_time_series(self, symbols, period, interval, start, end) -> pandas.DataFrame:
+    def get_multiple_symbols_time_series(self, symbols, period, interval, start, end) -> pd.DataFrame:
         string_construction = " ".join(symbols)
         assets = yf.Tickers(string_construction)
         return assets.history(period=period, interval=interval, start=start, end=end)

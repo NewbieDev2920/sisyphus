@@ -94,3 +94,19 @@ class AlpacaAccount(AccountPort):
         for pos in self.portfolio():
             portfolio[pos.symbol] = pos.qty
         return portfolio
+
+    def get_position_qty(self, symbol: str) -> float:
+        self.refresh()
+        for pos in self.portfolio():
+            if pos.symbol == symbol:
+                return float(pos.qty)
+        return 0.0
+    
+    def get_position_value(self, symbol: str) -> float:
+        self.refresh()
+        for pos in self.portfolio():
+            if pos.symbol == symbol:
+                return float(pos.market_value)
+        return 0.0
+
+    

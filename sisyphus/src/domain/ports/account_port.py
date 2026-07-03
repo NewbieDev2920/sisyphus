@@ -34,6 +34,14 @@ class AccountPort(ABC):
     def summary():
         pass
 
+    @abstractmethod
+    def get_position_qty():
+        pass
+
+    @abstractmethod
+    def get_position_value():
+        pass
+
 
     
 

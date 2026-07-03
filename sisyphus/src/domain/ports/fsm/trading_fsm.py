@@ -223,7 +223,9 @@ class TradingFSM:
         # pos = self.alpaca_account.get_position(self.symbol)
         # return float(pos.qty)
 
-        return 0.0
+        qty = self.alpaca_account.get_position_qty(self.symbol)
+
+        return qty
 
     def symbol_approx_price(self) -> float:
 

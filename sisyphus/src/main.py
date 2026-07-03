@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 import json
 
 
-# SIMPLIFIED APPROACH: Don't wrap bot in TUI to avoid event loop conflicts
+# SIMPLIFIED APPROACH: Don't wrap bot in Terminal User Interface to avoid event loop conflicts
 # The bot will run normally, TUI is only for market data display
 
 # Initialize ConsoleHandler early (before any prints)

@@ -7,3 +7,5 @@ Lib
 Include
 pyvenv.cfg
 src/images/
+data
+reports
