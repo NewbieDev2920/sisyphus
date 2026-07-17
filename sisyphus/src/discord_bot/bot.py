@@ -21,7 +21,7 @@ class SisyphusCog(discord.Cog):
 
     @discord.slash_command(name="hello", description="Say hello to the bot, Sisyphus will present itself and his capabilities")
     async def hello(self, ctx: discord.ApplicationContext):
-        await ctx.respond("My name is Sisyphus[ALPHA V0.2], I am the eternal damned, now condemned to trade thy stocks instead of pushing boulders.")
+        await ctx.respond("My name is Sisyphus[ALPHA V0.3], I am the eternal damned, now condemned to trade thy stocks instead of pushing boulders.")
     
     @discord.slash_command(name="subscribe", description = "Subscribe a symbol for allowing operations with the respective asset.")
     async def subscribe(self, ctx: discord.ApplicationContext, symbol : str):
