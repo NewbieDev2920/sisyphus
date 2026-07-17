@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from infrastructure.market_data.RealtimeMarketData import RealtimeMarketData
 from infrastructure.reporters.demo_reporter import DemoReporter
-from domain.strategies.monotonic_increasing import MonotonicIncreasing
+from domain.strategies.basic.monotonic_increasing import MonotonicIncreasing
 from rich import print
 from rich.layout import Layout
 

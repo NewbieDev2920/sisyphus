@@ -1,3 +1,4 @@
+from domain.events.discord_notification import DiscordNotification
 from domain.ports.fsm.states import State
 from domain.signals import Signal
 from domain.events.event import Event
@@ -5,7 +6,7 @@ from domain.events.fsm import StateChange, OrderResolved
 from domain.events.market import PriceUpdate
 from domain.events.strategy import SignalEvent
 from infrastructure.console_handler import get_console_handler
-
+from infrastructure.reporters.discord_reporter import DiscordReporter
 
 class TradingFSM:
 
@@ -15,13 +16,16 @@ class TradingFSM:
         alpaca_account,
         bot_bp: float,
         executor,
+        destiny_channel,
         current_state=State.FLAT,
-        limit: int = 3
+        limit: int = 3,
+        
     ):
         self.executor = executor
         self.symbol = symbol
         self.bot_bp = bot_bp
         self.alpaca_account = alpaca_account
+        self.destiny_channel = destiny_channel
 
         self.current_state = current_state
         self.limit = limit
@@ -30,6 +34,11 @@ class TradingFSM:
         self.strategies = []
 
         self.offer_price: float | None = None
+        self.current_qty: float = 0.0
+
+        #Reporters
+        self.discord_reporter = DiscordReporter(self.destiny_channel)
+        self.reporters = [self.discord_reporter]
 
         # Sync initial state
         self._sync_state_from_position()
@@ -43,6 +52,7 @@ class TradingFSM:
             StateChange: self._handle_state_change,
             OrderResolved: self._handle_order_resolved,
             PriceUpdate: self._handle_price_update,
+            DiscordNotification : self._handle_discord_notification
         }
 
         self._signal_handlers = {
@@ -89,6 +99,14 @@ class TradingFSM:
     def _handle_price_update(self, event: PriceUpdate):
 
         self.offer_price = float(event.price)
+        
+        # Propagar actualización de precio a todas las estrategias activas
+        for strategy in self.strategies:
+            strategy.update(event)
+    
+    def _handle_discord_notification(self, event : DiscordNotification):
+        for reporter in self.reporters:
+            reporter.update(event)
 
     # =====================================================
     # SIGNAL ROUTER
@@ -132,11 +150,15 @@ class TradingFSM:
 
         if qty <= 0:
             return
+            get_console_handler().print_bot("Not enough position quantities.")
 
         pos_qty = self.asset_qty()
 
         if pos_qty < qty:
-            get_console_handler().print_bot("Not enough assets to sell")
+            get_console_handler().print_bot(f"Adjusting sell qty from {qty} to {pos_qty}")
+            qty = pos_qty
+            
+        if qty <= 0:
             return
 
         self._sell_qty(qty)
@@ -202,9 +224,9 @@ class TradingFSM:
 
     def _sync_state_from_position(self):
 
-        qty = self.asset_qty()
+        self.current_qty = self.alpaca_account.get_position_qty(self.symbol)
 
-        if qty >= self.limit:
+        if self.current_qty >= self.limit:
             self.current_state = State.LONG
         else:
             self.current_state = State.FLAT
@@ -219,13 +241,7 @@ class TradingFSM:
 
     def asset_qty(self) -> float:
 
-        # Debe consultar Alpaca
-        # pos = self.alpaca_account.get_position(self.symbol)
-        # return float(pos.qty)
-
-        qty = self.alpaca_account.get_position_qty(self.symbol)
-
-        return qty
+        return self.current_qty
 
     def symbol_approx_price(self) -> float:
 

@@ -23,16 +23,16 @@ def ewma_point(series : pd.Series, com : float, adjust = True) -> float:
 
 ### CALCULATE NEW EWMA O(1)
 
-def next_ewma_point(current_ewma : float, point : float ,alpha : float) -> float:
+def next_ewma_point_alpha(current_ewma : float, point : float ,alpha : float) -> float:
     return alpha*point + (1-alpha)*current_ewma
 
-def next_ewma_point(current_ewma : float, point : float, halflife : float) -> float:
+def next_ewma_point_halflife(current_ewma : float, point : float, halflife : float) -> float:
     if halflife <= 0:
         raise Exception("halflife must hold the following condition: \n halflife > 0")
     alpha =  1 - math.exp(-math.log(2)/halflife)
     return alpha*point + (1-alpha)*current_ewma
 
-def next_ewma_point(current_ewma : float, point : float, com : float) -> float :
+def next_ewma_point_com(current_ewma : float, point : float, com : float) -> float :
     if com < 0:
         raise Exception("com must hold the following condition: \n com >= 0")
     alpha = 1/(1+com)

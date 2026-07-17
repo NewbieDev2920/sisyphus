@@ -7,7 +7,7 @@ from infrastructure.market_data.RealtimeMarketData import RealtimeMarketData
 from infrastructure.console_handler import ConsoleHandler
 from application.account_wallet_service import AccountWalletService
 from application.order_placer_service import OrderPlacerService
-from domain.strategies.manual import Manual
+from domain.strategies.basic.manual import Manual
 from domain.ports.fsm.trading_fsm import TradingFSM
 
 from discord_bot.bot import startSisyphus
@@ -35,6 +35,7 @@ API_KEY = os.getenv('API_KEY')
 SECRET = os.getenv('SECRET')
 ENDPOINT = os.getenv('ENDPOINT')
 WEBSOCKET_URL = os.getenv('WEBSOCKET_URL')
+FSM_NOTIFICATIONS_WEBHOOK =os.getenv('FSM_NOTIFICATIONS_WEBHOOK')
 
 #GLOBAL VARIABLES
 registered_symbols = None
@@ -57,7 +58,7 @@ register_handler = RegisterHandler("config.json",order_placer_service,alpaca_acc
 # REGISTER STRATEGIES
 for symbol in registered_symbols:
     console_handler.print_bot(f"[+] Registering manual strategy for {symbol}")
-    fsm = TradingFSM(symbol, alpaca_account, bot_bp=10000.0, executor=executor)
+    fsm = TradingFSM(symbol, alpaca_account, bot_bp=10000.0, executor=executor, destiny_channel= FSM_NOTIFICATIONS_WEBHOOK)
     registered_fsm.append(fsm)
     strategy = Manual(symbol, fsm)
     fsm.strategies.append(strategy)

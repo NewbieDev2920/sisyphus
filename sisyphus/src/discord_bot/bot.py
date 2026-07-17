@@ -2,7 +2,6 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import sys
-print(f"DEBUG: bot.py loaded. module name: {__name__}")
 import discord
 import asyncio
 import os
@@ -138,6 +137,14 @@ class SisyphusCog(discord.Cog):
         except Exception as e:
             await ctx.respond(f"An error occurred while displaying current fsm status: {e}")
  
+    @discord.slash_command(name="config_maps", description="Display configuration maps of all strategies in registered FSMs")
+    async def config_maps(self, ctx: discord.ApplicationContext):
+        try:
+            response = self.register_handler.fsm_config_maps()
+            await ctx.respond(f"[i]\n{response}")
+        except Exception as e:
+            await ctx.respond(f"An error occurred while displaying config maps: {e}")
+
     @discord.slash_command(name="toggle", description="Toggle console output between bot logs and stream logs")
     async def toggle(self, ctx: discord.ApplicationContext):
         try:
@@ -230,6 +237,102 @@ class SisyphusCog(discord.Cog):
             )
         except Exception as e:
             await ctx.respond(f"❌ **Manual Backtest Failed**: {str(e)}")
+
+    @discord.slash_command(
+        name="backtest_floor", 
+        description="Run a backtest for the Floor strategy with a specific floor price"
+    )
+    async def backtest_floor(
+        self, 
+        ctx: discord.ApplicationContext, 
+        symbol: str = discord.Option(str, description="Stock symbol (e.g. AAPL)"),
+        start_date: str = discord.Option(str, description="Start Date (YYYY-MM-DD)"),
+        end_date: str = discord.Option(str, description="End Date (YYYY-MM-DD)"),
+        floor_price: float = discord.Option(float, description="Stop-loss price"),
+        qty: float = discord.Option(float, description="Number of shares to buy initially", default=None),
+        notional: float = discord.Option(float, description="Dollar amount to buy initially", default=None),
+        interval: str = discord.Option(str, description="Time interval (e.g. 1d, 1h, 1m)", default="1d"),
+        cash: float = discord.Option(float, description="Initial cash balance", default=10000.0)
+    ):
+        await ctx.defer()
+        try:
+            if qty is None and notional is None:
+                await ctx.respond("❌ **Error**: You must specify either `qty` or `notional` to purchase.")
+                return
+
+            # Ejecutar en hilo secundario para evitar bloquear el bot de Discord y causar timeouts/desconexiones de red
+            report_path, plot_path, summary_text = await asyncio.to_thread(
+                self.backtest_service.run_floor_backtest,
+                symbol.upper(),
+                start_date,
+                end_date,
+                floor_price,
+                interval,
+                cash,
+                qty,
+                notional
+            )
+            
+            # Preparar archivos para adjuntar
+            files = [discord.File(report_path)]
+            if plot_path:
+                files.append(discord.File(plot_path))
+            
+            await ctx.respond(
+                content=f"📊 **Floor Backtest Complete for {symbol.upper()}**\n```\n{summary_text}\n```",
+                files=files
+            )
+        except Exception as e:
+            await ctx.respond(f"❌ **Floor Backtest Failed**: {str(e)}")
+
+    @discord.slash_command(
+        name="backtest_downside_momentum_risk", 
+        description="Run a backtest for the Downside Momentum Risk strategy"
+    )
+    async def backtest_downside_momentum_risk(
+        self, 
+        ctx: discord.ApplicationContext, 
+        symbol: str = discord.Option(str, description="Stock symbol (e.g. BTC-USD)"),
+        start_date: str = discord.Option(str, description="Start Date (YYYY-MM-DD)"),
+        end_date: str = discord.Option(str, description="End Date (YYYY-MM-DD)"),
+        short_alpha: float = discord.Option(float, description="Short term alpha (e.g. 0.1)", default=0.1),
+        long_alpha: float = discord.Option(float, description="Long term alpha (e.g. 0.01)", default=0.01),
+        threshold: float = discord.Option(float, description="Z-Score Threshold (e.g. 2.0)", default=2.0),
+        qty: float = discord.Option(float, description="Number of shares to buy initially", default=None),
+        notional: float = discord.Option(float, description="Dollar amount to buy initially", default=None),
+        interval: str = discord.Option(str, description="Time interval (e.g. 1d, 1h, 1m)", default="1d"),
+        cash: float = discord.Option(float, description="Initial cash balance", default=10000.0)
+    ):
+        await ctx.defer()
+        try:
+            if qty is None and notional is None:
+                await ctx.respond("❌ **Error**: You must specify either `qty` or `notional` to purchase.")
+                return
+
+            report_path, plot_path, summary_text = await asyncio.to_thread(
+                self.backtest_service.run_downside_momentum_risk_backtest,
+                symbol.upper(),
+                start_date,
+                end_date,
+                short_alpha,
+                long_alpha,
+                threshold,
+                interval,
+                cash,
+                qty,
+                notional
+            )
+            
+            files = [discord.File(report_path)]
+            if plot_path:
+                files.append(discord.File(plot_path))
+            
+            await ctx.respond(
+                content=f"📊 **Downside Momentum Risk Backtest Complete for {symbol.upper()}**\n```\n{summary_text}\n```",
+                files=files
+            )
+        except Exception as e:
+            await ctx.respond(f"❌ **Downside Momentum Risk Backtest Failed**: {str(e)}")
 
 
 class SisyphusBot(discord.Bot):

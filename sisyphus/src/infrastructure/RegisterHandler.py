@@ -1,6 +1,6 @@
 from domain.ports.register_handler_port import RegisterHandlerPort
 import json
-from domain.strategies.manual import Manual
+from domain.strategies.basic.manual import Manual
 from domain.ports.fsm.trading_fsm import TradingFSM
 from application.order_placer_service import OrderPlacerService
 from infrastructure.account.alpaca_account import AlpacaAccount
@@ -92,4 +92,26 @@ class RegisterHandler(RegisterHandlerPort):
                 strategies_msg = strategies_msg+"* "+strat.name+"\n"
             final_msg = final_msg+msg+strategies_msg
 
+        return final_msg
+
+    def fsm_config_maps(self):
+        final_msg = ""
+        for fsm in self.registered_fsm:
+            msg = f"""
+            ---------------------
+            |FSM : {fsm.symbol}
+            ----------------------
+            | CONFIG MAPS
+            ----------------------
+            """
+            strategies_msg = "\n"
+            for strat in fsm.strategies:
+                if hasattr(strat, "configuration_map"):
+                    strategies_msg += f"* {strat.name}:\n {strat.configuration_map()}\n"
+                else:
+                    strategies_msg += f"* {strat.name}: No configuration map available.\n"
+            final_msg += msg + strategies_msg
+
+        if not final_msg:
+            return "No registered FSMs or strategies."
         return final_msg

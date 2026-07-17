@@ -9,3 +9,5 @@ pyvenv.cfg
 src/images/
 data
 reports
+src/strategies/machine_learning
+src/strategies/statistical_inference

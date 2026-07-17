@@ -1,5 +1,5 @@
 import pandas as pd
-from analytics.rolling_std import rolling_std
+from computations.rolling_std import rolling_std
 import matplotlib.pyplot as plt
 
 player_list = [['M.S.Dhoni', 36, 75, 5428000],

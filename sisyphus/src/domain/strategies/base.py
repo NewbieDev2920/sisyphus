@@ -15,3 +15,11 @@ class Base(ABC):
     @abstractmethod
     def compute_signal(self, signal : Signal):
         pass
+
+    @abstractmethod
+    def notify(self, message:str):
+        pass
+
+    @abstractmethod
+    def configuration_map(self) -> str:
+        pass

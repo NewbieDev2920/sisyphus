@@ -1,3 +1,7 @@
+"""
+ESTA ESTRATEGIA ES ESTUPIDA Y TIENE DE MOTIVACIÓN HACER TESTS EN SÍSIFO.
+"""
+
 from domain.strategies.base import Base
 from domain.events.event import Event
 from domain.events.market import PriceUpdate

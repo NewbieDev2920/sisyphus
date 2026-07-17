@@ -29,3 +29,9 @@ class Manual(Base):
 
     def sell_notional(self, notional : float):
         self.compute_signal(Signal.SELL_NOTIONAL, notional)
+
+    def notify(self, message: str):
+        get_console_handler().print_bot(f"Manual strategy notification: {message}")
+
+    def configuration_map(self) -> str:
+        return f" \U0001f6e0\uFE0F Manual Strategy on {self.symbol}"
