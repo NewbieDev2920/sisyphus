@@ -22,13 +22,14 @@ class IntervalFeeder:
     sobre los datos racionados, emitiendo a la estrategia la métrica final lista para consumir.
     """
 
-    def __init__(self, interval_seconds: int, strategy_callback: Callable[[Any], None], parser_func: Callable[[float, float], float] = None):
+    def __init__(self, symbol: str, interval_seconds: int, strategy_callback: Callable[[Any], None], parser_func: Callable[[float, float], float] = None):
         """
         :param interval_seconds: Ventana de tiempo estricta para racionar (ej. 60 para 1 min).
         :param strategy_callback: La función de la estrategia (ej. strategy.update) que recibirá el evento.
         :param parser_func: Función opcional para parsear los datos (ej. log_return(current, previous)).
                             Si es None, se pasará el precio crudo directamente.
         """
+        self.symbol = symbol
         self.interval_seconds = interval_seconds
         self.strategy_callback = strategy_callback
         self.parser_func = parser_func
@@ -38,6 +39,10 @@ class IntervalFeeder:
         # Estado acumulado
         self.last_price = None
         self.previous_close = None
+
+
+    def update(self, event: PriceUpdate):
+        self.on_price_update(event)
 
     def on_price_update(self, event: PriceUpdate):
         """

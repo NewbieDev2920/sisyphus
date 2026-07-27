@@ -36,9 +36,10 @@ class RealtimeMarketData(RealtimeMarketDataPort):
         self.observers = {}
         self.reporters = []
 
-    def append_observer(self,obs):
-        if type(self.observers[obs.symbol]) is list:
-            self.observers[obs.symbol].append(obs)
+    def append_observer(self, obs):
+        if obs.symbol not in self.observers:
+            self.observers[obs.symbol] = []
+        self.observers[obs.symbol].append(obs)
 
     def append_reporter(self, reporter : ReporterPort):
         self.reporters.append(reporter)
@@ -84,7 +85,8 @@ class RealtimeMarketData(RealtimeMarketDataPort):
         self._send(req)
         if symbol not in self.registered_symbols:
             self.registered_symbols.append(symbol)
-            self.observers[symbol] = []
+            if symbol not in self.observers:
+                self.observers[symbol] = []
 
     def subscribe_all_official_registered_symbols(self):
         self._display(f"ALPACA> subscribe the following official symbols: {self.official_registered_symbols}")

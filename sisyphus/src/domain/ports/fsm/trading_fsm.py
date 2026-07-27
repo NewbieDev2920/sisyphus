@@ -66,6 +66,16 @@ class TradingFSM:
     # EVENT ROUTER
     # =====================================================
 
+
+    def update(self, event: Event):
+        self.on_event(event)
+        
+    def add_strategy(self, strategy):
+        self.strategies.append(strategy)
+        
+    def remove_strategy(self, strategy_name: str):
+        self.strategies = [s for s in self.strategies if s.name != strategy_name]
+
     def on_event(self, event: Event):
 
         handler = self._event_handlers.get(type(event))

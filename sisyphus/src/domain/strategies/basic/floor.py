@@ -9,7 +9,7 @@ from datetime import datetime
 
 #stop-loss strategy
 class Floor(Base):
-    def __init__(self,symbol : str, fsm ,floor_price : float):
+    def __init__(self,symbol : str, fsm ,floor_price : float = 1.0):
         self.fsm = fsm
         self.name = __class__.__name__
         self.symbol : str = symbol
@@ -46,7 +46,7 @@ class Floor(Base):
         self.fsm.on_event(SignalEvent(signal, numeric_value))
 
     def floor(self, price_update : PriceUpdate):
-        
+
         if price_update.price - self.floor_price <= 0 and self.qty > 0:
             self.compute_signal(Signal.SELL, self.qty) #Sell all positions
             self.notify()

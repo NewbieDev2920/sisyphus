@@ -49,7 +49,7 @@ class DownsideMomentumRisk(Base):
     """
 
 
-    def __init__(self, symbol: str, fsm, short_alpha: float, long_alpha: float, threshold: float, data_type: str = "Raw Prices", interval: str = "1m"):
+    def __init__(self, symbol: str, fsm, short_alpha: float = 0.1, long_alpha: float = 0.01, threshold: float = 2.0, data_type: str = "Raw Prices", interval: str = "1m"):
         # Se inicializan las variables base de la estrategia, como el símbolo, máquina de estados (FSM) y periodicidad
         self.symbol = symbol
         self.fsm = fsm

@@ -1,8 +1,13 @@
 {
-    "registered_symbols": [
-        "TSLA",
-        "SPY",
-        "AMD",
-        "FAKEPACA"
-    ]
+    "fsm_configs": {
+        "SPY": [],
+        "NVDA": [],
+        "FAKEPACA": [
+            {
+                "name": "Manual",
+                "interval_seconds": 60,
+                "params": {}
+            }
+        ]
+    }
 }
